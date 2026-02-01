@@ -181,6 +181,36 @@ const WallPicture = memo(({ x, y, w, h, bgColor }: { x: number; y: number; w: nu
   </View>
 ));
 
+// Standing whiteboard (on floor)
+const StandingWhiteboard = memo(({ x, y }: { x: number; y: number }) => (
+  <View style={{ position: 'absolute', left: x, top: y }}>
+    {/* Stand legs */}
+    <Rect x={5} y={70} w={6} h={20} color={'#505050'} />
+    <Rect x={59} y={70} w={6} h={20} color={'#505050'} />
+    {/* Cross bar */}
+    <Rect x={8} y={80} w={54} h={4} color={'#505050'} />
+    {/* Board frame */}
+    <Rect x={0} y={0} w={70} h={72} color={'#606060'} />
+    {/* White surface */}
+    <Rect x={4} y={4} w={62} h={64} color={'#F8F8F8'} />
+    {/* Writing/diagrams */}
+    <Rect x={8} y={10} w={30} h={3} color={'#3070B0'} />
+    <Rect x={8} y={18} w={45} h={3} color={'#3070B0'} />
+    <Rect x={8} y={26} w={25} h={3} color={'#3070B0'} />
+    {/* Box diagram */}
+    <Rect x={40} y={35} w={22} h={18} color={'#D05050'} />
+    <Rect x={43} y={38} w={16} h={12} color={'#F8F8F8'} />
+    {/* Arrow */}
+    <Rect x={12} y={45} w={20} h={3} color={'#40A060'} />
+    <Rect x={28} y={42} w={4} h={9} color={'#40A060'} />
+    {/* Marker tray at bottom */}
+    <Rect x={8} y={66} w={54} h={5} color={'#505050'} />
+    <Rect x={12} y={63} w={10} h={5} color={'#D04040'} />
+    <Rect x={26} y={63} w={10} h={5} color={'#4040D0'} />
+    <Rect x={40} y={63} w={10} h={5} color={'#40A040'} />
+  </View>
+));
+
 // Bookshelf
 const Bookshelf = memo(({ x, y }: { x: number; y: number }) => (
   <View style={{ position: 'absolute', left: x, top: y }}>
@@ -298,11 +328,11 @@ export const TopDownOffice = memo(({ width = 500, height = 380 }: TopDownOfficeP
           <Workstation x={15} y={130} facing="down" />
           <Workstation x={90} y={130} facing="down" />
 
-          {/* Third desk - single */}
-          <Workstation x={175} y={70} facing="down" />
+          {/* Standing whiteboard for thinking/planning */}
+          <StandingWhiteboard x={200} y={15} />
 
           {/* Plants in work area */}
-          <Plant x={170} y={15} size={1.5} />
+          <Plant x={170} y={130} size={1.5} />
           <Plant x={255} y={200} size={1.3} />
         </View>
 

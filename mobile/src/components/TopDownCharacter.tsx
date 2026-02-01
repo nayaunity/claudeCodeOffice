@@ -92,7 +92,7 @@ function getDeskPosition(action: CharacterAction): { x: number; y: number } {
   const desk2Chair = { x: 96, y: 88 };   // Second desk, first row
   const desk3Chair = { x: 21, y: 203 };  // First desk, second row
   const desk4Chair = { x: 96, y: 203 };  // Second desk, second row
-  const desk5Chair = { x: 181, y: 143 }; // Single desk
+  const whiteboard = { x: 220, y: 115 }; // Standing at whiteboard
   const waterCooler = { x: 430, y: 100 }; // At water cooler
   const couch = { x: 325, y: 210 };       // On couch
 
@@ -105,7 +105,7 @@ function getDeskPosition(action: CharacterAction): { x: number; y: number } {
     case 'searching':
       return desk2Chair; // Reading at second desk
     case 'thinking':
-      return desk5Chair; // Thinking at the single desk
+      return whiteboard; // Thinking at the whiteboard
     case 'celebrating':
       return desk1Chair; // Celebrating at main desk
     case 'frustrated':
