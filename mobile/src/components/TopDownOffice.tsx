@@ -101,20 +101,20 @@ const Workstation = memo(({ x, y }: { x: number; y: number }) => {
   return (
     <View style={{ position: 'absolute', left: x, top: y }}>
       {/* Desk */}
-      <Rect x={0} y={0} w={40} h={20} color={COLORS.deskTop} />
-      <Rect x={0} y={20} w={40} h={2} color={COLORS.deskShadow} />
+      <Rect x={0} y={0} w={40} h={22} color={COLORS.deskTop} />
+      <Rect x={0} y={22} w={40} h={2} color={COLORS.deskShadow} />
 
-      {/* Monitor on desk */}
-      <Rect x={13} y={2} w={14} h={10} color={COLORS.monitorFrame} />
-      <Rect x={15} y={4} w={10} h={6} color={COLORS.monitorScreenOn} />
-      <Rect x={18} y={12} w={4} h={2} color={COLORS.monitorStand} />
+      {/* Monitor on desk - larger and more visible */}
+      <Rect x={10} y={1} w={20} h={14} color={COLORS.monitorFrame} />
+      <Rect x={12} y={3} w={16} h={10} color={COLORS.monitorScreenOn} />
+      <Rect x={17} y={15} w={6} h={2} color={COLORS.monitorStand} />
 
       {/* Keyboard */}
-      <Rect x={14} y={15} w={12} h={3} color={'#555'} />
+      <Rect x={13} y={18} w={14} h={3} color={'#555'} />
 
       {/* Desk legs */}
-      <Rect x={3} y={22} w={3} h={5} color={COLORS.deskLeg} />
-      <Rect x={34} y={22} w={3} h={5} color={COLORS.deskLeg} />
+      <Rect x={3} y={24} w={3} h={5} color={COLORS.deskLeg} />
+      <Rect x={34} y={24} w={3} h={5} color={COLORS.deskLeg} />
     </View>
   );
 });
