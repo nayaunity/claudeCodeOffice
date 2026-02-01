@@ -59,29 +59,29 @@ export const TopDownOffice = memo(({ scale = 2, width = 380, height = 280 }: Top
         <View style={[styles.wallTrim, { backgroundColor: OFFICE_PALETTE.wallTrim }]} />
 
         {/* Wall decorations */}
-        {/* Bookshelf on left */}
-        <View style={{ position: 'absolute', left: 8, top: 8 }}>
-          <Sprite grid={OFFICE_SPRITES.furniture.bookshelf} scale={scale * 0.5} />
+        {/* Bookshelf on far left */}
+        <View style={{ position: 'absolute', left: 5, top: 6 }}>
+          <Sprite grid={OFFICE_SPRITES.furniture.bookshelf} scale={scale * 0.45} />
         </View>
 
-        {/* Chart in middle-left */}
-        <View style={{ position: 'absolute', left: 90, top: 10 }}>
-          <Sprite grid={OFFICE_SPRITES.furniture.wallChart} scale={scale * 0.55} />
+        {/* Whiteboard - prominent */}
+        <View style={{ position: 'absolute', left: 70, top: 8 }}>
+          <Sprite grid={OFFICE_SPRITES.furniture.whiteboard} scale={scale * 0.6} />
         </View>
 
         {/* Sign */}
-        <View style={[styles.sign, { left: width / 2 - 40, top: 15 }]}>
+        <View style={[styles.sign, { left: width / 2 - 35, top: 18 }]}>
           <Text style={styles.signText}>CLAUDE HQ</Text>
         </View>
 
-        {/* Another chart on right */}
-        <View style={{ position: 'absolute', right: 60, top: 10 }}>
+        {/* Chart on right */}
+        <View style={{ position: 'absolute', right: 70, top: 10 }}>
           <Sprite grid={OFFICE_SPRITES.furniture.wallChart} scale={scale * 0.5} />
         </View>
 
-        {/* Bookshelf on right */}
-        <View style={{ position: 'absolute', right: 8, top: 8 }}>
-          <Sprite grid={OFFICE_SPRITES.furniture.bookshelf} scale={scale * 0.45} />
+        {/* Bookshelf on far right */}
+        <View style={{ position: 'absolute', right: 5, top: 6 }}>
+          <Sprite grid={OFFICE_SPRITES.furniture.bookshelf} scale={scale * 0.4} />
         </View>
       </View>
 

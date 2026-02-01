@@ -255,7 +255,7 @@ export const COUCH: TileGrid = [
 ];
 
 // =============================================================================
-// WALL CHART/WHITEBOARD (20x16)
+// WALL CHART (20x16) - with line graph
 // =============================================================================
 
 export const WALL_CHART: TileGrid = [
@@ -275,6 +275,31 @@ export const WALL_CHART: TileGrid = [
   ['frameGold','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','frameGold'],
   ['frameGold','frameGold','frameGold','frameGold','frameGold','frameGold','frameGold','frameGold','frameGold','frameGold','frameGold','frameGold','frameGold','frameGold','frameGold','frameGold','frameGold','frameGold','frameGold','frameGold'],
   ['','','','','','','','','','','','','','','','','','','',''],
+];
+
+// =============================================================================
+// WHITEBOARD (28x18) - Large whiteboard with markers
+// =============================================================================
+
+export const WHITEBOARD: TileGrid = [
+  ['wallTrim','wallTrim','wallTrim','wallTrim','wallTrim','wallTrim','wallTrim','wallTrim','wallTrim','wallTrim','wallTrim','wallTrim','wallTrim','wallTrim','wallTrim','wallTrim','wallTrim','wallTrim','wallTrim','wallTrim','wallTrim','wallTrim','wallTrim','wallTrim','wallTrim','wallTrim','wallTrim','wallTrim'],
+  ['wallTrim','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','wallTrim'],
+  ['wallTrim','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','wallTrim'],
+  ['wallTrim','chartWhite','chartWhite','chartLine','chartLine','chartLine','chartLine','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','wallTrim'],
+  ['wallTrim','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','wallTrim'],
+  ['wallTrim','chartWhite','chartWhite','chartLine','chartLine','chartLine','chartLine','chartLine','chartLine','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','wallTrim'],
+  ['wallTrim','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','wallTrim'],
+  ['wallTrim','chartWhite','chartWhite','chartLine','chartLine','chartLine','chartLine','chartLine','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','wallTrim'],
+  ['wallTrim','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','wallTrim'],
+  ['wallTrim','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','wallTrim'],
+  ['wallTrim','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','wallTrim'],
+  ['wallTrim','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','wallTrim'],
+  ['wallTrim','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','wallTrim'],
+  ['wallTrim','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','chartWhite','wallTrim'],
+  ['wallTrim','wallTrim','wallTrim','wallTrim','wallTrim','wallTrim','wallTrim','wallTrim','wallTrim','wallTrim','wallTrim','wallTrim','wallTrim','wallTrim','wallTrim','wallTrim','wallTrim','wallTrim','wallTrim','wallTrim','wallTrim','wallTrim','wallTrim','wallTrim','wallTrim','wallTrim','wallTrim','wallTrim'],
+  ['','','','bookRed','bookRed','','bookBlue','bookBlue','','bookGreen','bookGreen','','','','','','','','','','','','','','','','',''],
+  ['','','','','','','','','','','','','','','','','','','','','','','','','','','',''],
+  ['','','','','','','','','','','','','','','','','','','','','','','','','','','',''],
 ];
 
 // =============================================================================
@@ -374,6 +399,7 @@ export const OFFICE_SPRITES = {
     bookshelf: BOOKSHELF,
     couch: COUCH,
     wallChart: WALL_CHART,
+    whiteboard: WHITEBOARD,
     waterCooler: WATER_COOLER,
   },
   character: {
