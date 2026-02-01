@@ -12,9 +12,9 @@ import { StatusBar as AppStatusBar } from './src/components/StatusBar';
 import { OFFICE_WIDTH, OFFICE_HEIGHT } from './src/utils/locations';
 import { AnimationEvent, AnimationState } from './src/types';
 
-// New dimensions for top-down office (larger for better visibility)
-const TOP_DOWN_WIDTH = 380;
-const TOP_DOWN_HEIGHT = 280;
+// New dimensions for top-down office (much larger for readability)
+const TOP_DOWN_WIDTH = 500;
+const TOP_DOWN_HEIGHT = 380;
 
 export default function App() {
   const { state: characterState, handleEvent } = useCharacterState();

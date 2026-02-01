@@ -70,22 +70,24 @@ const AnimatedSprite = memo(({
 });
 
 // Map action to position in the office
-// Positions calculated to sit character IN the desk chair
-// Office: Wall=60px height, Floor below that
-// Desk sprite (32x24 at 0.9 scale = 29x22): chair is at bottom rows 16-21
-// Desk positions: Row1 y=75, Row2 y=140, Row3 y=205 (absolute)
-// Desk x positions: Desk1 x=8, Desk2 x=85
-// Character sprite: 12x16 at scale 2 = 24x32
+// New larger office: 500x380, wall=80px, floor starts at y=80
+// Workstation positions (chair part):
+//   Desk 1: x=15, y=15 relative to floor → chair at x≈30, y≈95 (absolute: y=80+15=95)
+//   Desk 2: x=90, y=15 → chair at x≈105, y≈95
+//   Desk 3: x=15, y=130 → chair at x≈30, y≈210
+//   Desk 4: x=90, y=130 → chair at x≈105, y≈210
+//   Desk 5: x=175, y=70 → chair at x≈190, y≈150
+// Lounge: starts at x≈293, water cooler at ~438, couch at ~308
 
 function getDeskPosition(action: CharacterAction): { x: number; y: number } {
-  // Desk 1 chair position: x=8+14.5-12=10.5, y=75+14=89
-  // Adjusted to overlap with chair sprite perfectly
-  const desk1Chair = { x: 12, y: 88 };
-  const desk2Chair = { x: 89, y: 88 };
-  const desk3Chair = { x: 12, y: 153 };
-  const desk4Chair = { x: 89, y: 153 };
-  const waterCooler = { x: 320, y: 80 };
-  const couch = { x: 240, y: 175 };
+  // Character positions aligned with chair centers
+  const desk1Chair = { x: 32, y: 98 };   // First desk, first row
+  const desk2Chair = { x: 107, y: 98 };  // Second desk, first row
+  const desk3Chair = { x: 32, y: 213 };  // First desk, second row
+  const desk4Chair = { x: 107, y: 213 }; // Second desk, second row
+  const desk5Chair = { x: 192, y: 153 }; // Single desk
+  const waterCooler = { x: 445, y: 115 }; // At water cooler
+  const couch = { x: 340, y: 225 };       // On couch
 
   switch (action) {
     case 'typing':
@@ -94,9 +96,9 @@ function getDeskPosition(action: CharacterAction): { x: number; y: number } {
     case 'reading':
     case 'scrolling':
     case 'searching':
-      return desk1Chair; // Reading at main desk
+      return desk2Chair; // Reading at second desk
     case 'thinking':
-      return desk2Chair; // Thinking at second desk
+      return desk5Chair; // Thinking at the single desk
     case 'celebrating':
       return desk1Chair; // Celebrating at main desk
     case 'frustrated':
@@ -115,7 +117,7 @@ function getDeskPosition(action: CharacterAction): { x: number; y: number } {
 
 export const TopDownCharacter = memo(({
   state,
-  scale = 2,
+  scale = 2.5, // Larger scale for bigger office
   position,
 }: TopDownCharacterProps) => {
   const bounceAnim = useRef(new Animated.Value(0)).current;
