@@ -88,13 +88,15 @@ function getDeskPosition(action: CharacterAction): { x: number; y: number } {
   // Chair center: desk_x + 8 + 22 = desk_x + 30, desk_y + 80 + 20 = desk_y + 100
   // Character offset: -24 (half of 48 width), -32 (half of 64 height)
 
-  const desk1Chair = { x: 21, y: 88 };   // First desk, first row
-  const desk2Chair = { x: 96, y: 88 };   // Second desk, first row
-  const desk3Chair = { x: 21, y: 203 };  // First desk, second row
-  const desk4Chair = { x: 96, y: 203 };  // Second desk, second row
-  const whiteboard = { x: 220, y: 115 }; // Standing at whiteboard
-  const waterCooler = { x: 430, y: 100 }; // At water cooler
-  const couch = { x: 325, y: 210 };       // On couch
+  // Character is 12x16 at scale 6 = 72x96 pixels
+  // Adjust positions to center larger character on furniture
+  const desk1Chair = { x: 5, y: 75 };     // First desk, first row
+  const desk2Chair = { x: 80, y: 75 };    // Second desk, first row
+  const desk3Chair = { x: 5, y: 190 };    // First desk, second row
+  const desk4Chair = { x: 80, y: 190 };   // Second desk, second row
+  const whiteboard = { x: 205, y: 100 };  // Standing at whiteboard
+  const waterCooler = { x: 415, y: 85 };  // At water cooler
+  const couch = { x: 310, y: 195 };       // On couch
 
   switch (action) {
     case 'typing':
@@ -124,7 +126,7 @@ function getDeskPosition(action: CharacterAction): { x: number; y: number } {
 
 export const TopDownCharacter = memo(({
   state,
-  scale = 4, // Much larger to be visible against furniture
+  scale = 6, // Very large to match furniture size
   position,
 }: TopDownCharacterProps) => {
   const bounceAnim = useRef(new Animated.Value(0)).current;

@@ -61,7 +61,7 @@ export default function App() {
           // New top-down pixel art office
           <View style={styles.topDownWrapper}>
             <TopDownOffice width={TOP_DOWN_WIDTH} height={TOP_DOWN_HEIGHT} scale={2} />
-            <TopDownCharacter state={characterState} scale={2} />
+            <TopDownCharacter state={characterState} />
           </View>
         ) : (
           // Original side-view office
