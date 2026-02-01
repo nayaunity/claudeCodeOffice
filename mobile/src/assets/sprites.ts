@@ -3,9 +3,9 @@
 
 // Color palette - warm, cozy office aesthetic
 export const PALETTE = {
-  // Character colors
-  skin: '#FFD5B8',
-  skinShadow: '#E8B898',
+  // Character colors - African American skin tones
+  skin: '#8B5A2B',
+  skinShadow: '#6B4423',
   hair: '#5C4033',
   hairHighlight: '#7A5A45',
   shirt: '#6B8E9F',      // Claude blue-grey

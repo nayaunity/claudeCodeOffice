@@ -57,9 +57,9 @@ export const OFFICE_PALETTE = {
   chartWhite: '#F0F0F0',
   chartLine: '#6080A0',
 
-  // Characters
-  skin: '#F0D0B0',
-  skinShadow: '#D0B090',
+  // Characters - African American skin tones
+  skin: '#8B5A2B',
+  skinShadow: '#6B4423',
   hairBrown: '#705040',
   hairBlonde: '#D0B080',
   shirtBlue: '#6090C0',
