@@ -1,17 +1,24 @@
-import React, { useCallback } from 'react';
-import { StyleSheet, View, SafeAreaView, Text, Pressable } from 'react-native';
+import React, { useCallback, useState } from 'react';
+import { StyleSheet, View, SafeAreaView, Text, Pressable, Switch } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { useWebSocket } from './src/hooks/useWebSocket';
 import { useCharacterState } from './src/hooks/useCharacterState';
 import { OfficeScene } from './src/components/OfficeScene';
 import { Character } from './src/components/Character';
+import { TopDownOffice } from './src/components/TopDownOffice';
+import { TopDownCharacter } from './src/components/TopDownCharacter';
 import { ConnectionStatus } from './src/components/ConnectionStatus';
 import { StatusBar as AppStatusBar } from './src/components/StatusBar';
 import { OFFICE_WIDTH, OFFICE_HEIGHT } from './src/utils/locations';
 import { AnimationEvent, AnimationState } from './src/types';
 
+// New dimensions for top-down office (larger for better visibility)
+const TOP_DOWN_WIDTH = 380;
+const TOP_DOWN_HEIGHT = 280;
+
 export default function App() {
   const { state: characterState, handleEvent } = useCharacterState();
+  const [usePixelArt, setUsePixelArt] = useState(true); // Default to pixel art
 
   const onWebSocketEvent = useCallback((event: AnimationEvent) => {
     handleEvent(event);
@@ -37,12 +44,32 @@ export default function App() {
         <ConnectionStatus status={status} />
       </View>
 
+      {/* View mode toggle */}
+      <View style={styles.toggleContainer}>
+        <Text style={styles.toggleLabel}>Top-Down View</Text>
+        <Switch
+          value={usePixelArt}
+          onValueChange={setUsePixelArt}
+          trackColor={{ false: '#3d3d52', true: '#00d4ff' }}
+          thumbColor={usePixelArt ? '#fff' : '#888'}
+        />
+      </View>
+
       {/* Office viewport */}
       <View style={styles.officeContainer}>
-        <View style={styles.officeWrapper}>
-          <OfficeScene />
-          <Character state={characterState} />
-        </View>
+        {usePixelArt ? (
+          // New top-down pixel art office
+          <View style={styles.topDownWrapper}>
+            <TopDownOffice width={TOP_DOWN_WIDTH} height={TOP_DOWN_HEIGHT} scale={2} />
+            <TopDownCharacter state={characterState} scale={2} />
+          </View>
+        ) : (
+          // Original side-view office
+          <View style={styles.officeWrapper}>
+            <OfficeScene />
+            <Character state={characterState} />
+          </View>
+        )}
       </View>
 
       {/* Status info */}
@@ -155,6 +182,17 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
   },
+  toggleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 8,
+    gap: 8,
+  },
+  toggleLabel: {
+    color: '#888',
+    fontSize: 14,
+  },
   officeContainer: {
     flex: 1,
     alignItems: 'center',
@@ -167,6 +205,15 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     borderWidth: 2,
     borderColor: '#0f3460',
+  },
+  topDownWrapper: {
+    width: TOP_DOWN_WIDTH,
+    height: TOP_DOWN_HEIGHT,
+    borderRadius: 8,
+    overflow: 'hidden',
+    borderWidth: 2,
+    borderColor: '#5070A0',
+    position: 'relative',
   },
   statusContainer: {
     paddingHorizontal: 16,
