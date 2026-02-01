@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Claude Code Office - Event Monitor</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+      background: #1a1a2e;
+      color: #eee;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    h1 {
+      color: #00d4ff;
+      margin-bottom: 20px;
+      font-size: 24px;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .status-bar {
+      display: flex;
+      gap: 20px;
+      margin-bottom: 20px;
+      padding: 15px;
+      background: #16213e;
+      border-radius: 8px;
+      border: 1px solid #0f3460;
+    }
+
+    .status-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .status-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #ff6b6b;
+    }
+
+    .status-dot.connected {
+      background: #51cf66;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .current-state {
+      font-size: 48px;
+      text-align: center;
+      padding: 40px;
+      background: #16213e;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      border: 2px solid #0f3460;
+    }
+
+    .state-name {
+      font-size: 24px;
+      color: #00d4ff;
+      margin-top: 10px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+
+    .description {
+      font-size: 14px;
+      color: #888;
+      margin-top: 8px;
+    }
+
+    .events-log {
+      background: #16213e;
+      border-radius: 8px;
+      border: 1px solid #0f3460;
+      max-height: 400px;
+      overflow-y: auto;
+    }
+
+    .events-header {
+      padding: 12px 15px;
+      background: #0f3460;
+      font-weight: bold;
+      position: sticky;
+      top: 0;
+    }
+
+    .event-item {
+      padding: 10px 15px;
+      border-bottom: 1px solid #0f3460;
+      display: flex;
+      gap: 15px;
+      align-items: flex-start;
+    }
+
+    .event-item:last-child {
+      border-bottom: none;
+    }
+
+    .event-time {
+      color: #666;
+      font-size: 12px;
+      min-width: 80px;
+    }
+
+    .event-anim {
+      font-weight: bold;
+      min-width: 100px;
+    }
+
+    .event-desc {
+      color: #aaa;
+      flex: 1;
+    }
+
+    .event-tool {
+      color: #ffd43b;
+      font-size: 12px;
+      background: #2d2d44;
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+
+    /* Animation state colors */
+    .anim-idle { color: #868e96; }
+    .anim-thinking { color: #74c0fc; }
+    .anim-typing { color: #69db7c; }
+    .anim-reading { color: #ffd43b; }
+    .anim-searching { color: #da77f2; }
+    .anim-terminal { color: #ff922b; }
+    .anim-browsing { color: #20c997; }
+    .anim-delegating { color: #e599f7; }
+    .anim-waiting { color: #fcc419; }
+    .anim-success { color: #51cf66; }
+    .anim-error { color: #ff6b6b; }
+    .anim-entering { color: #00d4ff; }
+    .anim-leaving { color: #868e96; }
+
+    /* State emojis */
+    .emoji-idle::before { content: '😴'; }
+    .emoji-thinking::before { content: '🤔'; }
+    .emoji-typing::before { content: '⌨️'; }
+    .emoji-reading::before { content: '📖'; }
+    .emoji-searching::before { content: '🔍'; }
+    .emoji-terminal::before { content: '💻'; }
+    .emoji-browsing::before { content: '🌐'; }
+    .emoji-delegating::before { content: '👥'; }
+    .emoji-waiting::before { content: '✋'; }
+    .emoji-success::before { content: '✅'; }
+    .emoji-error::before { content: '❌'; }
+    .emoji-entering::before { content: '👋'; }
+    .emoji-leaving::before { content: '🚪'; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Claude Code Office - Event Monitor</h1>
+
+    <div class="status-bar">
+      <div class="status-item">
+        <div class="status-dot" id="connectionDot"></div>
+        <span id="connectionStatus">Disconnected</span>
+      </div>
+      <div class="status-item">
+        <span>Events received:</span>
+        <strong id="eventCount">0</strong>
+      </div>
+    </div>
+
+    <div class="current-state">
+      <div id="stateEmoji" class="emoji-idle"></div>
+      <div id="stateName" class="state-name">Idle</div>
+      <div id="stateDesc" class="description">Waiting for connection...</div>
+    </div>
+
+    <div class="events-log">
+      <div class="events-header">Event Log</div>
+      <div id="eventsList"></div>
+    </div>
+  </div>
+
+  <script>
+    const WS_URL = 'ws://localhost:3002';
+    let ws = null;
+    let eventCount = 0;
+    let reconnectAttempts = 0;
+
+    const connectionDot = document.getElementById('connectionDot');
+    const connectionStatus = document.getElementById('connectionStatus');
+    const eventCountEl = document.getElementById('eventCount');
+    const stateEmoji = document.getElementById('stateEmoji');
+    const stateName = document.getElementById('stateName');
+    const stateDesc = document.getElementById('stateDesc');
+    const eventsList = document.getElementById('eventsList');
+
+    function connect() {
+      ws = new WebSocket(WS_URL);
+
+      ws.onopen = () => {
+        console.log('Connected to event server');
+        connectionDot.classList.add('connected');
+        connectionStatus.textContent = 'Connected';
+        reconnectAttempts = 0;
+      };
+
+      ws.onclose = () => {
+        console.log('Disconnected from event server');
+        connectionDot.classList.remove('connected');
+        connectionStatus.textContent = 'Disconnected - Reconnecting...';
+
+        // Exponential backoff reconnect
+        const delay = Math.min(1000 * Math.pow(2, reconnectAttempts), 10000);
+        reconnectAttempts++;
+        setTimeout(connect, delay);
+      };
+
+      ws.onerror = (err) => {
+        console.error('WebSocket error:', err);
+      };
+
+      ws.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          handleEvent(data);
+        } catch (err) {
+          console.error('Failed to parse event:', err);
+        }
+      };
+    }
+
+    function handleEvent(event) {
+      eventCount++;
+      eventCountEl.textContent = eventCount;
+
+      // Update current state display
+      const anim = event.animation;
+      stateEmoji.className = `emoji-${anim}`;
+      stateName.textContent = anim;
+      stateName.className = `state-name anim-${anim}`;
+      stateDesc.textContent = event.description || '';
+
+      // Add to log
+      const time = new Date(event.timestamp).toLocaleTimeString();
+      const item = document.createElement('div');
+      item.className = 'event-item';
+      item.innerHTML = `
+        <span class="event-time">${time}</span>
+        <span class="event-anim anim-${anim}">${anim}</span>
+        ${event.tool ? `<span class="event-tool">${event.tool}</span>` : ''}
+        <span class="event-desc">${event.description || ''}</span>
+      `;
+
+      // Add to top of list
+      eventsList.insertBefore(item, eventsList.firstChild);
+
+      // Keep only last 50 events
+      while (eventsList.children.length > 50) {
+        eventsList.removeChild(eventsList.lastChild);
+      }
+    }
+
+    // Start connection
+    connect();
+  </script>
+</body>
+</html>
