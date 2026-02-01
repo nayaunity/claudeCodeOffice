@@ -22,7 +22,7 @@ export const PixelSprite = memo(({ sprite, scale = 4, style }: PixelSpriteProps)
       {sprite.map((row, y) => (
         <View key={y} style={styles.row}>
           {row.map((colorKey, x) => {
-            if (!colorKey || colorKey === '') return (
+            if (!colorKey) return (
               <View
                 key={`${x}-${y}`}
                 style={{ width: pixelSize, height: pixelSize }}

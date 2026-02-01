@@ -1,5 +1,16 @@
 import React, { memo } from 'react';
-import { View, StyleSheet, Text } from 'react-native';
+import { View, StyleSheet, Text, ImageSourcePropType, Image } from 'react-native';
+import {
+  IMAGES_AVAILABLE,
+  FURNITURE_SPRITES_ENABLED,
+  ASSET_PATHS,
+  FURNITURE_SPRITES,
+  TILE_SPRITES,
+  SHEET_SIZES,
+} from '../assets/images';
+import { FURNITURE_IMAGES, FurnitureImageKey } from '../assets/images/furniture';
+import { SpriteSheet, AnimatedSpriteSheet, createFrameGrid } from './SpriteSheet';
+import ImageSprite from './ImageSprite';
 
 // Color palette matching Pixel HQ style
 const COLORS = {
@@ -68,25 +79,128 @@ interface TopDownOfficeProps {
   height?: number;
 }
 
-// Simple rectangle component
+// Simple rectangle component (fallback renderer)
 const Rect = ({ x, y, w, h, color }: { x: number; y: number; w: number; h: number; color: string }) => (
   <View style={{ position: 'absolute', left: x, top: y, width: w, height: h, backgroundColor: color }} />
 );
 
+// Individual furniture sprite component (uses pre-extracted PNGs)
+interface FurnitureSpriteProps {
+  x: number;
+  y: number;
+  type: FurnitureImageKey;
+  scale?: number;
+}
+
+const FurnitureSprite = memo(({ x, y, type, scale = 1 }: FurnitureSpriteProps) => {
+  const source = FURNITURE_IMAGES[type];
+  if (!source) return null;
+
+  return (
+    <Image
+      source={source}
+      style={{
+        position: 'absolute',
+        left: x,
+        top: y,
+        width: 32 * scale,
+        height: 32 * scale,
+      }}
+      resizeMode="contain"
+    />
+  );
+});
+
+// Image-based furniture components (used when LimeZu assets are available)
+type FurnitureSpriteType = keyof typeof FURNITURE_SPRITES;
+
+interface ImageFurnitureProps {
+  x: number;
+  y: number;
+  type: FurnitureSpriteType;
+  scale?: number;
+}
+
+const ImageFurniture = memo(({ x, y, type, scale = 1 }: ImageFurnitureProps) => {
+  if (!FURNITURE_SPRITES_ENABLED || !ASSET_PATHS.furniture) {
+    return null;
+  }
+
+  const source = ASSET_PATHS.furniture as ImageSourcePropType;
+  const config = FURNITURE_SPRITES[type];
+
+  if (!config) {
+    return null;
+  }
+
+  return (
+    <SpriteSheet
+      source={source}
+      frame={config}
+      scale={scale}
+      position={{ x, y }}
+      sheetWidth={SHEET_SIZES.furniture.width}
+      sheetHeight={SHEET_SIZES.furniture.height}
+    />
+  );
+});
+
+// Image-based tile rendering (used when LimeZu assets are available)
+type TileSpriteType = keyof typeof TILE_SPRITES;
+
+interface ImageTileProps {
+  x: number;
+  y: number;
+  type: TileSpriteType;
+  scale?: number;
+}
+
+const ImageTile = memo(({ x, y, type, scale = 1 }: ImageTileProps) => {
+  if (!FURNITURE_SPRITES_ENABLED || !ASSET_PATHS.tiles) {
+    return null;
+  }
+
+  const source = ASSET_PATHS.tiles as ImageSourcePropType;
+  const config = TILE_SPRITES[type];
+
+  if (!config) {
+    return null;
+  }
+
+  return (
+    <SpriteSheet
+      source={source}
+      frame={config}
+      scale={scale}
+      position={{ x, y }}
+      sheetWidth={SHEET_SIZES.tiles.width}
+      sheetHeight={SHEET_SIZES.tiles.height}
+    />
+  );
+});
+
 // Monitor component (detailed)
-const Monitor = memo(({ x, y, scale = 1 }: { x: number; y: number; scale?: number }) => (
-  <View style={{ position: 'absolute', left: x, top: y }}>
-    {/* Monitor frame */}
-    <Rect x={0} y={0} w={24 * scale} h={18 * scale} color={COLORS.monitorFrame} />
-    {/* Screen */}
-    <Rect x={2 * scale} y={2 * scale} w={20 * scale} h={12 * scale} color={COLORS.monitorScreen} />
-    {/* Screen glow */}
-    <Rect x={3 * scale} y={3 * scale} w={18 * scale} h={10 * scale} color={COLORS.monitorScreenOn} />
-    {/* Stand */}
-    <Rect x={10 * scale} y={18 * scale} w={4 * scale} h={4 * scale} color={COLORS.monitorStand} />
-    <Rect x={6 * scale} y={22 * scale} w={12 * scale} h={2 * scale} color={COLORS.monitorStand} />
-  </View>
-));
+const Monitor = memo(({ x, y, scale = 1 }: { x: number; y: number; scale?: number }) => {
+  // Use LimeZu sprite if available
+  if (FURNITURE_SPRITES_ENABLED && ASSET_PATHS.furniture) {
+    return <ImageFurniture x={x} y={y} type="monitorSingle" scale={scale} />;
+  }
+
+  // Fallback to Rect-based rendering
+  return (
+    <View style={{ position: 'absolute', left: x, top: y }}>
+      {/* Monitor frame */}
+      <Rect x={0} y={0} w={24 * scale} h={18 * scale} color={COLORS.monitorFrame} />
+      {/* Screen */}
+      <Rect x={2 * scale} y={2 * scale} w={20 * scale} h={12 * scale} color={COLORS.monitorScreen} />
+      {/* Screen glow */}
+      <Rect x={3 * scale} y={3 * scale} w={18 * scale} h={10 * scale} color={COLORS.monitorScreenOn} />
+      {/* Stand */}
+      <Rect x={10 * scale} y={18 * scale} w={4 * scale} h={4 * scale} color={COLORS.monitorStand} />
+      <Rect x={6 * scale} y={22 * scale} w={12 * scale} h={2 * scale} color={COLORS.monitorStand} />
+    </View>
+  );
+});
 
 // Keyboard component
 const Keyboard = memo(({ x, y, scale = 1 }: { x: number; y: number; scale?: number }) => (
@@ -96,21 +210,31 @@ const Keyboard = memo(({ x, y, scale = 1 }: { x: number; y: number; scale?: numb
   </View>
 ));
 
-// Desk with monitor and keyboard - no chair (character sits here)
-const Workstation = memo(({ x, y }: { x: number; y: number }) => {
+// Desk with monitor and chair - complete workstation
+const Workstation = memo(({ x, y, withChair = true }: { x: number; y: number; withChair?: boolean }) => {
+  // Use LimeZu individual sprites - SCALED UP
+  if (FURNITURE_SPRITES_ENABLED) {
+    return (
+      <View style={{ position: 'absolute', left: x, top: y }}>
+        {/* Desk with legs */}
+        <FurnitureSprite x={0} y={0} type="desk" scale={2} />
+        {/* Monitor on desk */}
+        <FurnitureSprite x={12} y={-30} type="monitor" scale={1.4} />
+        {/* Chair in front of desk */}
+        {withChair && <FurnitureSprite x={10} y={60} type="chairBlueFront" scale={1.6} />}
+      </View>
+    );
+  }
+
+  // Rect-based desk with LimeZu monitor
   return (
     <View style={{ position: 'absolute', left: x, top: y }}>
       {/* Desk */}
       <Rect x={0} y={0} w={40} h={26} color={COLORS.deskTop} />
       <Rect x={0} y={26} w={40} h={2} color={COLORS.deskShadow} />
 
-      {/* Monitor pushed back on desk */}
-      <Rect x={10} y={2} w={20} h={10} color={COLORS.monitorFrame} />
-      <Rect x={12} y={4} w={16} h={6} color={COLORS.monitorScreenOn} />
-      <Rect x={17} y={12} w={6} h={2} color={COLORS.monitorStand} />
-
-      {/* Keyboard in front with desk space */}
-      <Rect x={13} y={16} w={14} h={3} color={'#555'} />
+      {/* LimeZu Monitor on desk - centered */}
+      <FurnitureSprite x={-5} y={-58} type="monitor" scale={2.5} />
 
       {/* Desk legs */}
       <Rect x={3} y={28} w={3} h={5} color={COLORS.deskLeg} />
@@ -119,19 +243,27 @@ const Workstation = memo(({ x, y }: { x: number; y: number }) => {
   );
 });
 
-// Plant in pot - smaller
-const Plant = memo(({ x, y, size = 0.7 }: { x: number; y: number; size?: number }) => (
-  <View style={{ position: 'absolute', left: x, top: y }}>
-    {/* Leaves */}
-    <Rect x={6 * size} y={0} w={6 * size} h={6 * size} color={COLORS.plantGreen} />
-    <Rect x={3 * size} y={3 * size} w={5 * size} h={8 * size} color={COLORS.plantGreen} />
-    <Rect x={10 * size} y={3 * size} w={5 * size} h={8 * size} color={COLORS.plantGreen} />
-    <Rect x={5 * size} y={6 * size} w={8 * size} h={6 * size} color={COLORS.plantDark} />
-    {/* Pot */}
-    <Rect x={5 * size} y={12 * size} w={8 * size} h={7 * size} color={COLORS.potBrown} />
-    <Rect x={3 * size} y={10 * size} w={12 * size} h={3 * size} color={COLORS.potBrown} />
-  </View>
-));
+// Plant in pot
+const Plant = memo(({ x, y, size = 1.5, large = false }: { x: number; y: number; size?: number; large?: boolean }) => {
+  // Use LimeZu sprite if available - SCALED UP
+  if (FURNITURE_SPRITES_ENABLED) {
+    return <FurnitureSprite x={x} y={y} type="plant" scale={size * 1.5} />;
+  }
+
+  // Fallback to Rect-based rendering
+  return (
+    <View style={{ position: 'absolute', left: x, top: y }}>
+      {/* Leaves */}
+      <Rect x={6 * size} y={0} w={6 * size} h={6 * size} color={COLORS.plantGreen} />
+      <Rect x={3 * size} y={3 * size} w={5 * size} h={8 * size} color={COLORS.plantGreen} />
+      <Rect x={10 * size} y={3 * size} w={5 * size} h={8 * size} color={COLORS.plantGreen} />
+      <Rect x={5 * size} y={6 * size} w={8 * size} h={6 * size} color={COLORS.plantDark} />
+      {/* Pot */}
+      <Rect x={5 * size} y={12 * size} w={8 * size} h={7 * size} color={COLORS.potBrown} />
+      <Rect x={3 * size} y={10 * size} w={12 * size} h={3 * size} color={COLORS.potBrown} />
+    </View>
+  );
+});
 
 // Wall picture/chart
 const WallPicture = memo(({ x, y, w, h, bgColor }: { x: number; y: number; w: number; h: number; bgColor: string }) => (
@@ -145,98 +277,135 @@ const WallPicture = memo(({ x, y, w, h, bgColor }: { x: number; y: number; w: nu
   </View>
 ));
 
-// Standing whiteboard (on floor) - smaller
-const StandingWhiteboard = memo(({ x, y }: { x: number; y: number }) => (
-  <View style={{ position: 'absolute', left: x, top: y }}>
-    {/* Stand legs */}
-    <Rect x={3} y={45} w={4} h={12} color={'#505050'} />
-    <Rect x={38} y={45} w={4} h={12} color={'#505050'} />
-    {/* Cross bar */}
-    <Rect x={5} y={52} w={35} h={3} color={'#505050'} />
-    {/* Board frame */}
-    <Rect x={0} y={0} w={45} h={47} color={'#606060'} />
-    {/* White surface */}
-    <Rect x={3} y={3} w={39} h={41} color={'#F8F8F8'} />
-    {/* Writing/diagrams */}
-    <Rect x={6} y={7} w={18} h={2} color={'#3070B0'} />
-    <Rect x={6} y={12} w={28} h={2} color={'#3070B0'} />
-    <Rect x={6} y={17} w={15} h={2} color={'#3070B0'} />
-    {/* Box diagram */}
-    <Rect x={26} y={22} w={14} h={12} color={'#D05050'} />
-    <Rect x={28} y={24} w={10} h={8} color={'#F8F8F8'} />
-    {/* Arrow */}
-    <Rect x={8} y={28} w={12} h={2} color={'#40A060'} />
-    <Rect x={18} y={26} w={3} h={6} color={'#40A060'} />
-    {/* Marker tray at bottom */}
-    <Rect x={6} y={42} w={33} h={3} color={'#505050'} />
-    <Rect x={8} y={40} w={6} h={3} color={'#D04040'} />
-    <Rect x={17} y={40} w={6} h={3} color={'#4040D0'} />
-    <Rect x={26} y={40} w={6} h={3} color={'#40A040'} />
-  </View>
-));
+// Standing whiteboard (on floor)
+const StandingWhiteboard = memo(({ x, y }: { x: number; y: number }) => {
+  // Use LimeZu sprite if available - SCALED UP
+  if (FURNITURE_SPRITES_ENABLED) {
+    return <FurnitureSprite x={x} y={y} type="whiteboard" scale={2.5} />;
+  }
 
-// Bookshelf - smaller
-const Bookshelf = memo(({ x, y }: { x: number; y: number }) => (
-  <View style={{ position: 'absolute', left: x, top: y }}>
-    {/* Shelf frame */}
-    <Rect x={0} y={0} w={32} h={35} color={COLORS.deskShadow} />
-    {/* Shelf back */}
-    <Rect x={2} y={2} w={28} h={31} color={COLORS.deskTop} />
-    {/* Books row 1 */}
-    <Rect x={4} y={4} w={4} h={8} color={COLORS.bookRed} />
-    <Rect x={9} y={4} w={4} h={8} color={COLORS.bookBlue} />
-    <Rect x={14} y={4} w={5} h={8} color={COLORS.bookGreen} />
-    <Rect x={20} y={4} w={4} h={8} color={COLORS.bookYellow} />
-    <Rect x={25} y={4} w={4} h={8} color={COLORS.bookRed} />
-    {/* Shelf divider */}
-    <Rect x={2} y={13} w={28} h={2} color={COLORS.deskShadow} />
-    {/* Books row 2 */}
-    <Rect x={4} y={17} w={5} h={7} color={COLORS.bookGreen} />
-    <Rect x={10} y={17} w={4} h={7} color={COLORS.bookBlue} />
-    <Rect x={15} y={17} w={5} h={7} color={COLORS.bookRed} />
-    <Rect x={21} y={17} w={4} h={7} color={COLORS.bookYellow} />
-    <Rect x={26} y={17} w={4} h={7} color={COLORS.bookBlue} />
-    {/* Shelf divider */}
-    <Rect x={2} y={25} w={28} h={2} color={COLORS.deskShadow} />
-    {/* Items row 3 */}
-    <Rect x={5} y={28} w={6} h={5} color={COLORS.plantGreen} />
-    <Rect x={14} y={28} w={6} h={5} color={COLORS.bookBlue} />
-    <Rect x={23} y={28} w={5} h={5} color={COLORS.picYellow} />
-  </View>
-));
+  // Fallback to Rect-based rendering
+  return (
+    <View style={{ position: 'absolute', left: x, top: y }}>
+      {/* Stand legs */}
+      <Rect x={3} y={45} w={4} h={12} color={'#505050'} />
+      <Rect x={38} y={45} w={4} h={12} color={'#505050'} />
+      {/* Cross bar */}
+      <Rect x={5} y={52} w={35} h={3} color={'#505050'} />
+      {/* Board frame */}
+      <Rect x={0} y={0} w={45} h={47} color={'#606060'} />
+      {/* White surface */}
+      <Rect x={3} y={3} w={39} h={41} color={'#F8F8F8'} />
+      {/* Writing/diagrams */}
+      <Rect x={6} y={7} w={18} h={2} color={'#3070B0'} />
+      <Rect x={6} y={12} w={28} h={2} color={'#3070B0'} />
+      <Rect x={6} y={17} w={15} h={2} color={'#3070B0'} />
+      {/* Box diagram */}
+      <Rect x={26} y={22} w={14} h={12} color={'#D05050'} />
+      <Rect x={28} y={24} w={10} h={8} color={'#F8F8F8'} />
+      {/* Arrow */}
+      <Rect x={8} y={28} w={12} h={2} color={'#40A060'} />
+      <Rect x={18} y={26} w={3} h={6} color={'#40A060'} />
+      {/* Marker tray at bottom */}
+      <Rect x={6} y={42} w={33} h={3} color={'#505050'} />
+      <Rect x={8} y={40} w={6} h={3} color={'#D04040'} />
+      <Rect x={17} y={40} w={6} h={3} color={'#4040D0'} />
+      <Rect x={26} y={40} w={6} h={3} color={'#40A040'} />
+    </View>
+  );
+});
 
-// Couch - smaller
-const Couch = memo(({ x, y }: { x: number; y: number }) => (
-  <View style={{ position: 'absolute', left: x, top: y }}>
-    {/* Back */}
-    <Rect x={0} y={0} w={60} h={10} color={COLORS.couchDark} />
-    {/* Seat */}
-    <Rect x={0} y={10} w={60} h={20} color={COLORS.couchBlue} />
-    {/* Cushion lines */}
-    <Rect x={20} y={12} w={2} h={16} color={COLORS.couchDark} />
-    <Rect x={38} y={12} w={2} h={16} color={COLORS.couchDark} />
-    {/* Arms */}
-    <Rect x={-4} y={6} w={6} h={24} color={COLORS.couchDark} />
-    <Rect x={58} y={6} w={6} h={24} color={COLORS.couchDark} />
-  </View>
-));
+// Bookshelf - smaller (using Rect fallback since we don't have bookshelf sprite yet)
+const Bookshelf = memo(({ x, y }: { x: number; y: number }) => {
+  // For now, use Rect-based rendering (no bookshelf sprite copied)
+  // TODO: Copy bookshelf sprite if needed
 
-// Water cooler - smaller
-const WaterCooler = memo(({ x, y }: { x: number; y: number }) => (
-  <View style={{ position: 'absolute', left: x, top: y }}>
-    {/* Water jug */}
-    <Rect x={4} y={0} w={12} h={16} color={COLORS.coolerWater} />
-    <Rect x={6} y={-3} w={8} h={5} color={COLORS.coolerWater} />
-    {/* Body */}
-    <Rect x={1} y={16} w={18} h={26} color={COLORS.coolerBody} />
-    <Rect x={0} y={20} w={20} h={3} color={COLORS.monitorFrame} />
-    {/* Dispenser area */}
-    <Rect x={5} y={30} w={10} h={10} color={COLORS.monitorFrame} />
-    {/* Legs */}
-    <Rect x={3} y={42} w={4} h={5} color={COLORS.monitorFrame} />
-    <Rect x={13} y={42} w={4} h={5} color={COLORS.monitorFrame} />
-  </View>
-));
+  // Fallback to Rect-based rendering
+  return (
+    <View style={{ position: 'absolute', left: x, top: y }}>
+      {/* Shelf frame */}
+      <Rect x={0} y={0} w={32} h={35} color={COLORS.deskShadow} />
+      {/* Shelf back */}
+      <Rect x={2} y={2} w={28} h={31} color={COLORS.deskTop} />
+      {/* Books row 1 */}
+      <Rect x={4} y={4} w={4} h={8} color={COLORS.bookRed} />
+      <Rect x={9} y={4} w={4} h={8} color={COLORS.bookBlue} />
+      <Rect x={14} y={4} w={5} h={8} color={COLORS.bookGreen} />
+      <Rect x={20} y={4} w={4} h={8} color={COLORS.bookYellow} />
+      <Rect x={25} y={4} w={4} h={8} color={COLORS.bookRed} />
+      {/* Shelf divider */}
+      <Rect x={2} y={13} w={28} h={2} color={COLORS.deskShadow} />
+      {/* Books row 2 */}
+      <Rect x={4} y={17} w={5} h={7} color={COLORS.bookGreen} />
+      <Rect x={10} y={17} w={4} h={7} color={COLORS.bookBlue} />
+      <Rect x={15} y={17} w={5} h={7} color={COLORS.bookRed} />
+      <Rect x={21} y={17} w={4} h={7} color={COLORS.bookYellow} />
+      <Rect x={26} y={17} w={4} h={7} color={COLORS.bookBlue} />
+      {/* Shelf divider */}
+      <Rect x={2} y={25} w={28} h={2} color={COLORS.deskShadow} />
+      {/* Items row 3 */}
+      <Rect x={5} y={28} w={6} h={5} color={COLORS.plantGreen} />
+      <Rect x={14} y={28} w={6} h={5} color={COLORS.bookBlue} />
+      <Rect x={23} y={28} w={5} h={5} color={COLORS.picYellow} />
+    </View>
+  );
+});
+
+// Couch
+const Couch = memo(({ x, y }: { x: number; y: number }) => {
+  // Use LimeZu sprite if available - render as 3-piece couch - SCALED UP
+  if (FURNITURE_SPRITES_ENABLED) {
+    const scale = 1.8;
+    return (
+      <View style={{ position: 'absolute', left: x, top: y }}>
+        <FurnitureSprite x={0} y={0} type="couchLeft" scale={scale} />
+        <FurnitureSprite x={50} y={0} type="couchMid" scale={scale} />
+        <FurnitureSprite x={100} y={0} type="couchRight" scale={scale} />
+      </View>
+    );
+  }
+
+  // Fallback to Rect-based rendering
+  return (
+    <View style={{ position: 'absolute', left: x, top: y }}>
+      {/* Back */}
+      <Rect x={0} y={0} w={60} h={10} color={COLORS.couchDark} />
+      {/* Seat */}
+      <Rect x={0} y={10} w={60} h={20} color={COLORS.couchBlue} />
+      {/* Cushion lines */}
+      <Rect x={20} y={12} w={2} h={16} color={COLORS.couchDark} />
+      <Rect x={38} y={12} w={2} h={16} color={COLORS.couchDark} />
+      {/* Arms */}
+      <Rect x={-4} y={6} w={6} h={24} color={COLORS.couchDark} />
+      <Rect x={58} y={6} w={6} h={24} color={COLORS.couchDark} />
+    </View>
+  );
+});
+
+// Water cooler
+const WaterCooler = memo(({ x, y }: { x: number; y: number }) => {
+  // Use LimeZu sprite if available - SCALED UP
+  if (FURNITURE_SPRITES_ENABLED) {
+    return <FurnitureSprite x={x} y={y} type="waterCooler" scale={2} />;
+  }
+
+  // Fallback to Rect-based rendering
+  return (
+    <View style={{ position: 'absolute', left: x, top: y }}>
+      {/* Water jug */}
+      <Rect x={4} y={0} w={12} h={16} color={COLORS.coolerWater} />
+      <Rect x={6} y={-3} w={8} h={5} color={COLORS.coolerWater} />
+      {/* Body */}
+      <Rect x={1} y={16} w={18} h={26} color={COLORS.coolerBody} />
+      <Rect x={0} y={20} w={20} h={3} color={COLORS.monitorFrame} />
+      {/* Dispenser area */}
+      <Rect x={5} y={30} w={10} h={10} color={COLORS.monitorFrame} />
+      {/* Legs */}
+      <Rect x={3} y={42} w={4} h={5} color={COLORS.monitorFrame} />
+      <Rect x={13} y={42} w={4} h={5} color={COLORS.monitorFrame} />
+    </View>
+  );
+});
 
 export const TopDownOffice = memo(({ width = 420, height = 300 }: TopDownOfficeProps) => {
   const wallHeight = 55;
@@ -301,7 +470,7 @@ export const TopDownOffice = memo(({ width = 420, height = 300 }: TopDownOfficeP
           <Workstation x={130} y={100} />
 
           {/* Plants in work area */}
-          <Plant x={185} y={80} size={1.2} />
+          <Plant x={185} y={80} size={1.2} large={true} />
           <Plant x={200} y={180} size={1} />
         </View>
 
@@ -328,16 +497,20 @@ export const TopDownOffice = memo(({ width = 420, height = 300 }: TopDownOfficeP
           <Couch x={15} y={100} />
 
           {/* Plants */}
-          <Plant x={20} y={20} size={1.3} />
-          <Plant x={115} y={170} size={1.1} />
+          <Plant x={20} y={20} size={1.3} large={true} />
+          <Plant x={115} y={170} size={1.1} large={true} />
 
           {/* Extra chair */}
-          <View style={{ position: 'absolute', left: 80, top: 45 }}>
-            <Rect x={0} y={0} w={22} h={18} color={COLORS.chairBlue} />
-            <Rect x={3} y={3} w={16} h={12} color={COLORS.chairSeat} />
-            <Rect x={0} y={18} w={6} h={5} color={COLORS.chairBlueDark} />
-            <Rect x={16} y={18} w={6} h={5} color={COLORS.chairBlueDark} />
-          </View>
+          {FURNITURE_SPRITES_ENABLED ? (
+            <FurnitureSprite x={80} y={45} type="chairBlueFront" scale={1.6} />
+          ) : (
+            <View style={{ position: 'absolute', left: 80, top: 45 }}>
+              <Rect x={0} y={0} w={22} h={18} color={COLORS.chairBlue} />
+              <Rect x={3} y={3} w={16} h={12} color={COLORS.chairSeat} />
+              <Rect x={0} y={18} w={6} h={5} color={COLORS.chairBlueDark} />
+              <Rect x={16} y={18} w={6} h={5} color={COLORS.chairBlueDark} />
+            </View>
+          )}
         </View>
       </View>
     </View>

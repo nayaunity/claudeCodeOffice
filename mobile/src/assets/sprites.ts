@@ -158,7 +158,7 @@ export const CLAUDE_READING: PixelGrid = [
   ['','','','','hair','hair','hair','hair','hair','hair','hair','hair','','','',''],
   ['','','','hair','hair','skin','skin','skin','skin','skin','skin','hair','hair','','',''],
   ['','','','hair','skin','skin','skin','skin','skin','skin','skin','skin','hair','','',''],
-  ['','','','hair','skin','hairShadow','skin','skin','skin','skin','hairShadow','skin','hair','','',''], // squinting
+  ['','','','hair','skin','skinShadow','skin','skin','skin','skin','skinShadow','skin','hair','','',''], // squinting
   ['','','','hair','skin','skin','skin','skin','skin','skin','skin','skin','hair','','',''],
   ['','','','','skin','skin','skin','skinShadow','skinShadow','skin','skin','skin','','','',''],
   ['','','','','','skin','skin','skin','skin','skin','skin','skin','','','',''], // hand on chin

@@ -1,13 +1,24 @@
 import React, { useEffect, useRef, memo } from 'react';
-import { View, Animated, Easing } from 'react-native';
+import { View, Animated, Easing, ImageSourcePropType } from 'react-native';
 import { CharacterState, CharacterAction } from '../types';
 import { OFFICE_PALETTE, TileGrid, OFFICE_SPRITES } from '../assets/officeSprites';
+import {
+  IMAGES_AVAILABLE,
+  ASSET_PATHS,
+  SPRITE_SIZES,
+  SHEET_SIZES,
+  getCharacterAnimation,
+  Direction,
+} from '../assets/images';
+import { AnimatedSpriteSheet } from './SpriteSheet';
 
 interface TopDownCharacterProps {
   state: CharacterState;
   scale?: number;
   // Position in the office (pixel coordinates)
   position?: { x: number; y: number };
+  // Target position for calculating walk direction
+  targetPosition?: { x: number; y: number };
 }
 
 // Render a sprite
@@ -27,7 +38,7 @@ const Sprite = memo(({
       {grid.map((row, y) => (
         <View key={y} style={{ flexDirection: 'row' }}>
           {row.map((colorKey, x) => {
-            if (!colorKey || colorKey === '') return (
+            if (!colorKey) return (
               <View key={`${x}-${y}`} style={{ width: pixelSize, height: pixelSize }} />
             );
             const color = OFFICE_PALETTE[colorKey as keyof typeof OFFICE_PALETTE];
@@ -44,7 +55,7 @@ const Sprite = memo(({
   );
 });
 
-// Animated sprite that cycles through frames
+// Animated sprite that cycles through frames (TileGrid fallback)
 const AnimatedSprite = memo(({
   frames,
   frameRate = 4,
@@ -67,6 +78,59 @@ const AnimatedSprite = memo(({
   }, [frames.length, frameRate]);
 
   return <Sprite grid={frames[currentFrame]} scale={scale} />;
+});
+
+// Calculate walk direction based on movement vector
+function calculateWalkDirection(
+  from: { x: number; y: number },
+  to: { x: number; y: number }
+): Direction {
+  const dx = to.x - from.x;
+  const dy = to.y - from.y;
+
+  // Prioritize horizontal movement if larger
+  if (Math.abs(dx) > Math.abs(dy)) {
+    return dx > 0 ? 'right' : 'left';
+  }
+  // Vertical movement (down is positive y in screen coords)
+  return dy > 0 ? 'down' : 'up';
+}
+
+// Image-based character sprite (used when LimeZu assets are available)
+interface ImageCharacterSpriteProps {
+  action: CharacterAction;
+  scale: number;
+  direction?: Direction;
+}
+
+const ImageCharacterSprite = memo(({ action, scale, direction }: ImageCharacterSpriteProps) => {
+  if (!IMAGES_AVAILABLE) {
+    return null;
+  }
+
+  // Get animation config for this action with direction
+  const animConfig = getCharacterAnimation(action, direction);
+
+  // Get the correct sprite sheet based on the animation
+  const sheetKey = animConfig.sheet as keyof typeof ASSET_PATHS;
+  const source = ASSET_PATHS[sheetKey] as ImageSourcePropType;
+  const sheetSize = SHEET_SIZES[sheetKey as keyof typeof SHEET_SIZES];
+
+  if (!source || !sheetSize) {
+    return null;
+  }
+
+  return (
+    <AnimatedSpriteSheet
+      source={source}
+      frames={animConfig.frames}
+      frameRate={animConfig.frameRate}
+      scale={scale}
+      sheetWidth={sheetSize.width}
+      sheetHeight={sheetSize.height}
+      loop={animConfig.loop}
+    />
+  );
 });
 
 // Map action to position in the office
@@ -121,12 +185,22 @@ export const TopDownCharacter = memo(({
   state,
   scale = 2.5, // Balanced size to match smaller furniture
   position,
+  targetPosition,
 }: TopDownCharacterProps) => {
   const bounceAnim = useRef(new Animated.Value(0)).current;
   const walkAnim = useRef(new Animated.Value(0)).current;
+  const [walkDirection, setWalkDirection] = React.useState<Direction>('down');
 
   // Get position based on action if not explicitly provided
   const charPosition = position || getDeskPosition(state.currentAction);
+
+  // Calculate walk direction when moving
+  React.useEffect(() => {
+    if (state.isWalking && targetPosition && position) {
+      const newDirection = calculateWalkDirection(position, targetPosition);
+      setWalkDirection(newDirection);
+    }
+  }, [state.isWalking, position, targetPosition]);
 
   // Action-specific animations
   useEffect(() => {
@@ -218,6 +292,21 @@ export const TopDownCharacter = memo(({
 
   // Determine which sprite to show
   const renderCharacter = () => {
+    // Calculate direction for walking, or use action-specific default
+    const direction = state.isWalking ? walkDirection : undefined;
+
+    // Use image-based sprites if available
+    if (IMAGES_AVAILABLE) {
+      return (
+        <ImageCharacterSprite
+          action={state.currentAction}
+          scale={scale * 0.65} // Smaller character
+          direction={direction}
+        />
+      );
+    }
+
+    // Fallback to TileGrid-based sprites
     if (isTyping) {
       return (
         <AnimatedSprite
